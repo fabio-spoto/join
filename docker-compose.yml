@@ -1,0 +1,13 @@
+services:
+  join:
+    build: .
+    ports:
+      - "${JOIN_PORT:-8080}:80"
+    environment:
+      JOIN_DATA_PATH: /data/join_data.json
+    volumes:
+      - join-data:/data
+    restart: unless-stopped
+
+volumes:
+  join-data:

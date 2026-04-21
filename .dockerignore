@@ -1,0 +1,7 @@
+.git
+**/.venv
+**/__pycache__
+**/*.pyc
+backend/join_data.json
+.DS_Store
+**/.DS_Store

@@ -1,10 +1,46 @@
+/**
+ * Basis-URL der Daten-API (ersetzt Firebase Realtime Database).
+ * - window.JOIN_API_BASE: manuell (überschreibt alles)
+ * - file://: Flask auf 127.0.0.1:5000
+ * - typische Dev-Static-Server (z. B. Live Server :5500): API auf :5000
+ * - sonst gleiche Origin (Docker-Compose z. B. :8080→80, Production)
+ */
+function joinDefaultApiBase() {
+    if (typeof window === "undefined") {
+        return "http://127.0.0.1:5000/";
+    }
+    if (window.JOIN_API_BASE) {
+        return window.JOIN_API_BASE.endsWith("/")
+            ? window.JOIN_API_BASE
+            : `${window.JOIN_API_BASE}/`;
+    }
+    const loc = window.location;
+    if (!loc.hostname && loc.protocol === "file:") {
+        return "http://127.0.0.1:5000/";
+    }
+    const host = loc.hostname;
+    const port = loc.port || "";
+    const local = host === "localhost" || host === "127.0.0.1" || host === "::1";
+    const devStaticPorts = new Set([
+        "5500", "3000", "5173", "4173", "9323", "8081", "8888", "5501",
+    ]);
+    if (local && devStaticPorts.has(port)) {
+        return "http://127.0.0.1:5000/";
+    }
+    return new URL("/", loc.href).href;
+}
+
+const STORAGE_URL = joinDefaultApiBase();
 
 /**
- * The URL of the Firebase Realtime Database where data will be stored and retrieved.
- * Die URL der Firebase-Echtzeitdatenbank, in der Daten gespeichert und abgerufen werden.
+ * @param {string} path z. B. "contacts", "/tasks"
+ * @returns {string} Volle URL …/name.json
  */
-
-const STORAGE_URL = "https://join-bd291-default-rtdb.europe-west1.firebasedatabase.app/";
+function buildStorageUrl(path = "") {
+    const base = STORAGE_URL.replace(/\/+$/, "");
+    const clean = String(path).replace(/^\/+/, "");
+    return `${base}/${clean}.json`;
+}
 
 /**
  * An array containing contact data.
@@ -139,7 +175,7 @@ const colorPool = [
  */
 async function putData(path = "", data = {}) {
     try {
-        let response = await fetch(STORAGE_URL + path + ".json", {
+        let response = await fetch(buildStorageUrl(path), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -167,7 +203,7 @@ async function putData(path = "", data = {}) {
  *                              Ein Promise, das zu den Antwort-JSON-Daten auflöst.
  */
 async function loadData(path = "") {
-    let response = await fetch(STORAGE_URL + path + ".json");
+    let response = await fetch(buildStorageUrl(path));
     let responseAsJson = await response.json();
     return responseAsJson;
 }

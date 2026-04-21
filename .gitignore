@@ -1,0 +1,5 @@
+.DS_Store
+backend/.venv/
+backend/join_data.json
+__pycache__/
+*.pyc
