@@ -9,15 +9,15 @@ async function createGuest() {
     if (!usersObjectString) {
 
         const contacts = await loadContacts();
-        const tasks = await loadTasks();
+        const tasksFromApi = await loadTasks();
 
         const userGuest = [{
             'name': 'Guest',
             'email': 'guest@join.com',
             'password': '',
             'isLogin': false,
-            'contacts': contacts,
-            'tasks': tasks
+            'contacts': Array.isArray(contacts) ? contacts : [],
+            'tasks': Array.isArray(tasksFromApi) ? tasksFromApi : []
         }];
 
         localStorage.setItem('users', JSON.stringify(userGuest));

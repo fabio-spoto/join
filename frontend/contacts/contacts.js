@@ -11,7 +11,13 @@ let currentContact;
  * @returns {Promise<void>}
  */
 async function init() {
-    await loadContacts();
+    const loaded = await loadContacts();
+    if (Array.isArray(loaded)) {
+        contactData.length = 0;
+        for (const c of loaded) {
+            contactData.push(c);
+        }
+    }
     generateContactList();
 }
 
